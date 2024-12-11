@@ -5,6 +5,8 @@
 
   export let apiKey: string;
   export let model: string;
+  export let editMode: boolean;
+  
   let innerHtml = '';
   let isEditing = false;
   let editPosition = { x: 0, y: 0 };
@@ -24,6 +26,7 @@
   })
 
   function handleClick(event: MouseEvent) {
+    if (!editMode) return;
     if (!isEditing) {
       isEditing = true;
       editPosition = {
