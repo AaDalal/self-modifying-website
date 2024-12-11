@@ -8,15 +8,15 @@
   let innerHtml = '';
   let isEditing = false;
   let editPosition = { x: 0, y: 0 };
-  let targetElement: HTMLElement | null = null;
+  let targetElement: HTMLElement | undefined = undefined;
   let editText = '';
-
-  $: console.log(apiKey);
-
-  const client = new OpenAI({
+  let tgtElement: HTMLElement; 
+  $: boundingBox = targetElement?.getBoundingClientRect();
+  $: client = new OpenAI({
     apiKey,
     dangerouslyAllowBrowser: true,
   })
+  $: console.log(boundingBox)
 
   const HTMLEdit = z.object({
     reasoning: z.string(),
@@ -30,7 +30,8 @@
         x: event.clientX,
         y: event.clientY
       };
-      targetElement = event.target as HTMLElement;
+      if (tgtElement.contains(event.target as HTMLElement)) targetElement = event.target as HTMLElement
+      else targetElement = tgtElement;
       editText = '';
     }
   }
@@ -44,7 +45,7 @@
         messages: [
           {
             role: 'system',
-            content: `You are a web editing bot. Please edit the following html ${innerHtml} and output the result in a JSON format with a reasoning key and an html key.`
+            content: `You are a web editing bot. Please edit the following html ${innerHtml} and output the result in a JSON format with a reasoning key and an html key.` + (targetElement && targetElement !== tgtElement ? 'The user is currently referenceing this element ' + targetElement.outerHTML : '')
           },
           {
             role: 'user',
@@ -57,7 +58,7 @@
         const { reasoning, html } = parsedChatCompletion.choices[0].message.parsed;
         innerHtml = html;
       } else {
-
+        // TODO
       }
 
     }
@@ -78,27 +79,62 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div on:click={handleClick} class={$$props.class}>
   {#if isEditing}
+    {#if boundingBox !== undefined}
     <div 
-      class="absolute bg-gray-700 p-4 rounded-lg rounded-tl-none shadow-lg"
+      class="absolute bg-opacity-15 bg-orange-400 z-10"
+      id="overlay"
+      style="left: {boundingBox.left}px; top: {boundingBox.top}px; width: {boundingBox.width}px; height: {boundingBox.height}px;"
+    >
+    </div>
+    {/if}
+    <div 
+      class="absolute bg-gray-700 p-4 rounded-lg rounded-tl-none shadow-lg z-20"
       style="left: {editPosition.x}px; top: {editPosition.y}px;"
     >
-      <form on:submit={handleSubmit}>
+      <form 
+      on:submit={handleSubmit}
+      on:keydown={(e) => {
+        switch (e.key) {
+          case 'Escape':
+            handleCancel();
+            break
+          case 'Enter':
+            handleSubmit()
+            break
+          default:
+            break;
+          case 'ArrowUp': {
+            // Can't go up if we're at the top
+            if (targetElement?.parentElement && tgtElement !== targetElement?.parentElement) {
+              targetElement = targetElement?.parentElement;
+            }
+            break;
+          }
+          case 'ArrowDown': {
+            if (targetElement && targetElement?.children.length > 0) {
+              targetElement = targetElement?.children[0] as HTMLElement;
+            }
+            break;
+          }
+          case 'ArrowLeft': {
+            if (targetElement && targetElement?.previousElementSibling) {
+              targetElement = targetElement?.previousElementSibling as HTMLElement;
+            }
+            break;
+          }
+          case 'ArrowRight': {
+            if (targetElement && targetElement?.nextElementSibling) {
+              targetElement = targetElement?.nextElementSibling as HTMLElement;
+            }
+            break;
+          }
+        }
+      }}
+      >
         <!-- svelte-ignore a11y_autofocus -->
         <textarea
           autofocus
           bind:value={editText}
-          on:keydown={(e) => {
-            switch (e.key) {
-              case 'Escape':
-                handleCancel();
-                break
-              case 'Enter':
-                handleSubmit()
-                break
-              default:
-                break;
-          }
-          }}
         >
         </textarea>
         <div>
@@ -108,7 +144,7 @@
       </form>
     </div>
   {/if}
-  <div class="w-100 h-100" id="tgt">
+  <div class="w-full h-full" bind:this={tgtElement}>
     {@html innerHtml}
   </div>
 </div>

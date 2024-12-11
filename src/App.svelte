@@ -7,5 +7,5 @@
   let model = OPENAI_MODELS[0];
 </script>
 
-<Setup bind:apiKey={apiKey} bind:model={model} class="absolute left-0 top-0 right-0"/>
+<Setup bind:apiKey={apiKey} bind:model={model} class="absolute left-0 top-0 right-0 z-20"/>
 <Playground class="w-full h-full" apiKey={apiKey} model={model} />
