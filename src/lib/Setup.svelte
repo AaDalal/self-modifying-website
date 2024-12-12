@@ -1,5 +1,6 @@
 <script lang="ts">
   import { OPENAI_MODELS } from "../lib/constants";
+  import htmlStore from "./htmlStore";
 
   export let apiKey: string;
   export let model: string;
@@ -10,7 +11,7 @@
 
 <div class={$$props.class}>
   {#if expanded}
-    <div class="bg-slate-800 flex gap-2 items-center justify-center p-4">
+    <div class="shadow dark:bg-slate-800 bg-slate-300 flex gap-2 items-center justify-center p-4">
       <label for="apikey">OpenAI key</label>
       <input type="password" id="apikey" bind:value={apiKey}/>
       <label for="model">Model</label>
@@ -21,11 +22,12 @@
       </select>
       <label for="editMode">Edit Mode</label>
       <input type="checkbox" id="editMode" bind:checked={editMode}/>
+      <button class="rounded-none" on:click={() => htmlStore.set("")}>Clear canvas</button>
     </div>
   {/if}
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div class="rounded-b-full bg-slate-800 w-10 h-8 p-1 px-2 mx-auto" on:click={() => { expanded = !expanded }}>
+  <div class="shadow bg-slate-300 dark:bg-slate-800 w-10 h-8 p-1 px-2 mx-auto" on:click={() => { expanded = !expanded }}>
     <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="currentcolor" version="1.1" id="Layer_1" viewBox="0 0 512 512" xml:space="preserve" class={`w-full h-full transform ${expanded ? '' : 'rotate-180'}`}>
       <g>

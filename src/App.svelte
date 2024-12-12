@@ -1,5 +1,6 @@
 <script lang="ts">
   import { OPENAI_MODELS } from './lib/constants';
+  import Instructions from './lib/Instructions.svelte';
   import Playground from './lib/Playground.svelte';
   import Setup from './lib/Setup.svelte';
 
@@ -8,5 +9,6 @@
   let editMode = true;
 </script>
 
+<Instructions />
 <Setup bind:apiKey={apiKey} bind:model={model} bind:editMode={editMode} class="absolute left-0 top-0 right-0 z-20"/>
 <Playground class="w-full h-full" apiKey={apiKey} model={model} editMode={editMode} />
