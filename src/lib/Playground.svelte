@@ -29,6 +29,10 @@
     html: z.string()
   })
 
+  window.onbeforeunload = function() {
+    return "Are you sure you want to leave?"; // this won't be used in modern browsers
+  }
+
   function handleClick(event: MouseEvent) {
     if (!editMode) return;
     if (!isEditing) {
